@@ -1777,8 +1777,19 @@ def compute_length_penalty(sequence_length, alpha):
     penalty = ((5 + sequence_length) / 6) ** alpha
     return penalty
 
-# Step 76 - compute_candidate_scores (not yet solved)
-# TODO: implement
+# Step 76 - compute_candidate_scores
+import torch
+
+def compute_candidate_scores(beam_scores, next_token_log_probs):
+    """Combine beam scores with next-token log probabilities.
+
+    beam_scores: shape (num_beams,)
+    next_token_log_probs: shape (num_beams, vocab_size)
+    returns: shape (num_beams, vocab_size)
+    """
+    # Add each beam's running log-prob to its row of next-token log probs
+    # Broadcast beam_scores from (num_beams,) to (num_beams, vocab_size) and add
+    return beam_scores.unsqueeze(1) + next_token_log_probs
 
 # Step 77 - select_top_k_candidates (not yet solved)
 # TODO: implement
