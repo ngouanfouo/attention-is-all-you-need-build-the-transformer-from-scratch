@@ -1015,60 +1015,39 @@ def assemble_decoder_layer(y, encoder_output, layer_params, num_heads, src_mask,
     return y
 
 # Step 47 - stack_decoder_layers
-def assemble_decoder_layer(y, encoder_output, layer_params, num_heads, src_mask=None, tgt_mask=None):
+# ── Step 046  stack_decoder_layers ──
+import torch
+
+def stack_decoder_layers(y, encoder_output, decoder_layer_params_list, num_heads, src_mask=None, tgt_mask=None):
     """
-    Assemble a single decoder layer end-to-end.
+    Build the full Transformer decoder by sequentially applying each decoder layer 
+    to the running target-side hidden state using positional arguments.
     
     Args:
-        y: Target hidden state, shape (batch, tgt_seq, d_model)
-        encoder_output: Encoder output, shape (batch, src_seq, d_model)
-        layer_params: Dict holding weights for each sublayer
-        num_heads: Number of attention heads
-        src_mask: Source mask for cross-attention
-        tgt_mask: Target mask for self-attention (should include causal blocking)
-    
+        y: Target-side input/hidden state tensor of shape (B, T_tgt, d_model)
+        encoder_output: Encoder output tensor of shape (B, T_src, d_model)
+        decoder_layer_params_list: List of parameter dictionaries, one per decoder layer.
+        num_heads: Number of attention heads (integer)
+        src_mask: Source padding/attention mask tensor
+        tgt_mask: Target causal/padding mask tensor
+        
     Returns:
-        Output tensor of shape (batch, tgt_seq, d_model)
+        A torch.FloatTensor of shape (B, T_tgt, d_model) after processing through all layers.
     """
-    # 1. Masked Self-Attention Sub-layer
-    self_attn_out = decoder_layer_masked_self_attention_sublayer(
-        y=y,
-        w_q=layer_params['self_w_q'],
-        w_k=layer_params['self_w_k'],
-        w_v=layer_params['self_w_v'],
-        w_o=layer_params['self_w_o'],
-        gamma=layer_params['self_attn_gamma'],
-        beta=layer_params['self_attn_beta'],
-        num_heads=num_heads,
-        tgt_mask=tgt_mask
-    )
+    hidden_state = y
     
-    # 2. Cross-Attention Sub-layer
-    cross_attn_out = decoder_layer_cross_attention_sublayer(
-        y=self_attn_out,
-        encoder_output=encoder_output,
-        w_q=layer_params['cross_w_q'],
-        w_k=layer_params['cross_w_k'],
-        w_v=layer_params['cross_w_v'],
-        w_o=layer_params['cross_w_o'],
-        gamma=layer_params['cross_attn_gamma'],
-        beta=layer_params['cross_attn_beta'],
-        num_heads=num_heads,
-        src_mask=src_mask
-    )
-    
-    # 3. Feed-Forward Sub-layer
-    ff_out = decoder_layer_feed_forward_sublayer(
-        y=cross_attn_out,
-        w1=layer_params['ffn_w1'],
-        b1=layer_params['ffn_b1'],
-        w2=layer_params['ffn_w2'],
-        b2=layer_params['ffn_b2'],
-        gamma=layer_params['ffn_gamma'],
-        beta=layer_params['ffn_beta']
-    )
-    
-    return ff_out
+    for layer_params in decoder_layer_params_list:
+        # Pass parameters positionally to avoid parameter naming conflicts
+        hidden_state = assemble_decoder_layer(
+            hidden_state, 
+            encoder_output, 
+            layer_params, 
+            num_heads, 
+            src_mask, 
+            tgt_mask
+        )
+        
+    return hidden_state
 
 # Step 48 - apply_final_output_projection (not yet solved)
 # TODO: implement
