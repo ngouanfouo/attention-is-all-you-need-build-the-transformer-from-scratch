@@ -1641,8 +1641,53 @@ def zero_all_parameter_gradients(parameter_list):
             # Set grad to None to clear it (preferred method in PyTorch)
             param.grad = None
 
-# Step 71 - compute_batch_training_loss (not yet solved)
-# TODO: implement
+# Step 71 - compute_batch_training_loss
+import torch
+
+def compute_batch_training_loss(src_batch, tgt_batch, model_params, config):
+    """Perform one teacher-forced forward pass and return the averaged KL loss."""
+    # Extract config values
+    pad_id = config['pad_id']
+    start_id = config['start_id']
+    vocab_size = config['vocab_size']
+    smoothing = config['smoothing']
+    num_heads = config['num_heads']
+    d_model = config['d_model']
+    
+    # Ensure model_params has token_embedding key for run_transformer_forward
+    # The token embedding is src_embedding from the embedding params
+    if 'token_embedding' not in model_params:
+        model_params['token_embedding'] = model_params['src_embedding']
+    
+    # 1. Shift target sequence right with start token for teacher forcing
+    decoder_input = shift_targets_right_with_start_token(tgt_batch, start_id)
+    
+    # 2. Run the forward pass
+    # log_probabilities has shape (batch, tgt_seq, vocab_size)
+    log_probabilities = run_transformer_forward(src_batch, decoder_input, model_params, num_heads, pad_id)
+    
+    # 3. Build smoothed target distribution
+    # Get the target sequence length
+    batch_size, tgt_seq = tgt_batch.shape
+    
+    # Build uniform smoothing distribution
+    shape = (batch_size, tgt_seq, vocab_size)
+    smoothed_dist = build_uniform_smoothing_distribution(shape, vocab_size, smoothing)
+    
+    # Place confidence on gold tokens
+    confidence = 1.0 - smoothing
+    smoothed_dist = set_confidence_on_gold_tokens(smoothed_dist, tgt_batch, confidence)
+    
+    # Zero out pad column and pad token rows
+    smoothed_dist = zero_pad_column_and_pad_token_rows(smoothed_dist, tgt_batch, pad_id)
+    
+    # 4. Compute KL loss (summed over all entries)
+    total_loss = compute_label_smoothed_kl_loss(log_probabilities, smoothed_dist)
+    
+    # 5. Average loss over non-pad tokens
+    avg_loss = average_loss_over_non_pad_tokens(total_loss, tgt_batch, pad_id)
+    
+    return avg_loss
 
 # Step 72 - run_training_step_with_backprop (not yet solved)
 # TODO: implement
