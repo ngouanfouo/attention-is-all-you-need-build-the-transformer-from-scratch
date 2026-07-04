@@ -1371,8 +1371,39 @@ def shift_targets_right_with_start_token(target_ids, start_token_id):
     
     return shifted
 
-# Step 57 - compute_noam_learning_rate (not yet solved)
-# TODO: implement
+# Step 57 - compute_noam_learning_rate
+import math
+
+def compute_noam_learning_rate(step, d_model, warmup_steps):
+    """
+    Compute the Noam learning rate from the original Transformer paper.
+    
+    Formula: lr = (d_model ** -0.5) * min(step ** -0.5, step * warmup_steps ** -1.5)
+    
+    Args:
+        step: Current training step (integer, 1-indexed)
+        d_model: Model dimension
+        warmup_steps: Number of warmup steps
+    
+    Returns:
+        float: Learning rate for the given step
+    """
+    # Convert step to float for calculations
+    step = float(step)
+    
+    # Compute the two components
+    # 1. d_model ** -0.5
+    d_model_factor = d_model ** -0.5
+    
+    # 2. min(step ** -0.5, step * warmup_steps ** -1.5)
+    step_inv_sqrt = step ** -0.5
+    step_linear = step * (warmup_steps ** -1.5)
+    min_factor = min(step_inv_sqrt, step_linear)
+    
+    # Combined learning rate
+    lr = d_model_factor * min_factor
+    
+    return float(lr)
 
 # Step 58 - build_uniform_smoothing_distribution (not yet solved)
 # TODO: implement
