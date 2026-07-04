@@ -1566,8 +1566,16 @@ def update_adam_first_moment(m_prev, grad, beta1):
     # Detach to ensure the returned tensor doesn't track gradients
     return m_t.detach()
 
-# Step 66 - update_adam_second_moment (not yet solved)
-# TODO: implement
+# Step 66 - update_adam_second_moment
+import torch
+
+def update_adam_second_moment(v_prev, grad, beta2):
+    """Return v_t = beta2 * v_prev + (1 - beta2) * grad ** 2."""
+    # Apply Adam's EMA update for the second moment
+    v_t = beta2 * v_prev + (1 - beta2) * (grad ** 2)
+    
+    # Detach to ensure the returned tensor doesn't track gradients
+    return v_t.detach()
 
 # Step 67 - apply_adam_bias_correction (not yet solved)
 # TODO: implement
