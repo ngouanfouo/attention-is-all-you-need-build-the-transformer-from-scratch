@@ -1137,8 +1137,69 @@ def run_transformer_forward(src_ids, tgt_ids, model_params, num_heads, pad_id):
     
     return log_probs
 
-# Step 52 - init_encoder_layer_parameters (not yet solved)
-# TODO: implement
+# Step 52 - init_encoder_layer_parameters
+import torch
+import math
+
+def init_encoder_layer_parameters(d_model, num_heads, d_ff):
+    """Return a dict of leaf tensors with requires_grad=True for one encoder layer."""
+    # Attention projection weights (no biases) - use randn directly with scaling
+    w_q = torch.randn(d_model, d_model, dtype=torch.float32, requires_grad=True) * 0.02
+    # This creates a non-leaf tensor. Instead, we should use torch.nn.init or create with uniform distribution.
+    
+    # Better approach: use torch.empty() and then fill with Xavier/Glorot initialization
+    # Or use torch.nn.init directly
+    
+    # Let's use the approach that creates leaf tensors:
+    w_q = torch.empty(d_model, d_model, dtype=torch.float32)
+    torch.nn.init.xavier_uniform_(w_q)
+    w_q.requires_grad_(True)
+    
+    w_k = torch.empty(d_model, d_model, dtype=torch.float32)
+    torch.nn.init.xavier_uniform_(w_k)
+    w_k.requires_grad_(True)
+    
+    w_v = torch.empty(d_model, d_model, dtype=torch.float32)
+    torch.nn.init.xavier_uniform_(w_v)
+    w_v.requires_grad_(True)
+    
+    w_o = torch.empty(d_model, d_model, dtype=torch.float32)
+    torch.nn.init.xavier_uniform_(w_o)
+    w_o.requires_grad_(True)
+    
+    # Feed-forward weights and biases
+    w1 = torch.empty(d_model, d_ff, dtype=torch.float32)
+    torch.nn.init.xavier_uniform_(w1)
+    w1.requires_grad_(True)
+    
+    b1 = torch.zeros(d_ff, dtype=torch.float32, requires_grad=True)
+    
+    w2 = torch.empty(d_ff, d_model, dtype=torch.float32)
+    torch.nn.init.xavier_uniform_(w2)
+    w2.requires_grad_(True)
+    
+    b2 = torch.zeros(d_model, dtype=torch.float32, requires_grad=True)
+    
+    # Layer normalization parameters
+    attn_gamma = torch.ones(d_model, dtype=torch.float32, requires_grad=True)
+    attn_beta = torch.zeros(d_model, dtype=torch.float32, requires_grad=True)
+    ffn_gamma = torch.ones(d_model, dtype=torch.float32, requires_grad=True)
+    ffn_beta = torch.zeros(d_model, dtype=torch.float32, requires_grad=True)
+    
+    return {
+        'w_q': w_q,
+        'w_k': w_k,
+        'w_v': w_v,
+        'w_o': w_o,
+        'w1': w1,
+        'b1': b1,
+        'w2': w2,
+        'b2': b2,
+        'attn_gamma': attn_gamma,
+        'attn_beta': attn_beta,
+        'ffn_gamma': ffn_gamma,
+        'ffn_beta': ffn_beta
+    }
 
 # Step 53 - init_decoder_layer_parameters (not yet solved)
 # TODO: implement
