@@ -1471,8 +1471,20 @@ def zero_pad_column_and_pad_token_rows(smoothed_distribution, gold_token_ids, pa
     
     return result
 
-# Step 61 - compute_label_smoothed_kl_loss (not yet solved)
-# TODO: implement
+# Step 61 - compute_label_smoothed_kl_loss
+import torch
+
+def compute_label_smoothed_kl_loss(log_probabilities, smoothed_distribution):
+    """Return the summed KL loss over all (batch, time, vocab) entries."""
+    # Cross-entropy loss: -sum(P * log(Q))
+    loss = -torch.sum(smoothed_distribution * log_probabilities)
+    
+    # Handle potential -0.0 by clamping very small negative values to 0
+    # If loss is extremely close to 0 (within floating point precision), set to 0
+    if torch.abs(loss) < 1e-10:
+        loss = torch.tensor(0.0, device=loss.device)
+    
+    return loss
 
 # Step 62 - average_loss_over_non_pad_tokens (not yet solved)
 # TODO: implement
