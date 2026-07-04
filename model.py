@@ -1405,8 +1405,23 @@ def compute_noam_learning_rate(step, d_model, warmup_steps):
     
     return float(lr)
 
-# Step 58 - build_uniform_smoothing_distribution (not yet solved)
-# TODO: implement
+# Step 58 - build_uniform_smoothing_distribution
+import torch
+
+def build_uniform_smoothing_distribution(shape, vocab_size, epsilon):
+    """
+    Create the uniform smoothing tensor for label-smoothed cross entropy.
+    
+    Args:
+        shape: Tuple like (batch, tgt_seq, vocab_size)
+        vocab_size: Total vocabulary size
+        epsilon: Smoothing parameter
+    
+    Returns:
+        torch.Tensor of shape `shape` filled with epsilon / (vocab_size - 2)
+    """
+    value = epsilon / (vocab_size - 2)
+    return torch.full(shape, value, dtype=torch.float32)
 
 # Step 59 - set_confidence_on_gold_tokens (not yet solved)
 # TODO: implement
