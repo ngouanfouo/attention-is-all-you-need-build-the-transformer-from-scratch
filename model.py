@@ -1555,8 +1555,16 @@ def initialize_adam_optimizer_state(parameter_list):
         't': t
     }
 
-# Step 65 - update_adam_first_moment (not yet solved)
-# TODO: implement
+# Step 65 - update_adam_first_moment
+import torch
+
+def update_adam_first_moment(m_prev, grad, beta1):
+    """Return m_t = beta1 * m_prev + (1 - beta1) * grad."""
+    # Apply the Adam first-moment EMA update
+    m_t = beta1 * m_prev + (1 - beta1) * grad
+    
+    # Detach to ensure the returned tensor doesn't track gradients
+    return m_t.detach()
 
 # Step 66 - update_adam_second_moment (not yet solved)
 # TODO: implement
