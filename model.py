@@ -1577,8 +1577,18 @@ def update_adam_second_moment(v_prev, grad, beta2):
     # Detach to ensure the returned tensor doesn't track gradients
     return v_t.detach()
 
-# Step 67 - apply_adam_bias_correction (not yet solved)
-# TODO: implement
+# Step 67 - apply_adam_bias_correction
+import torch
+
+def apply_adam_bias_correction(m_t, v_t, beta1, beta2, step):
+    """Return bias-corrected (m_hat, v_hat) for Adam at the given step."""
+    # Bias correction for first moment: divide by (1 - beta1**step)
+    m_hat = m_t / (1 - beta1 ** step)
+    
+    # Bias correction for second moment: divide by (1 - beta2**step)
+    v_hat = v_t / (1 - beta2 ** step)
+    
+    return m_hat, v_hat
 
 # Step 69 - apply_adam_step_to_all_parameters (not yet solved)
 # TODO: implement
