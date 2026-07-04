@@ -1346,8 +1346,30 @@ def collect_model_parameters_into_list(encoder_layer_params, decoder_layer_param
     
     return param_list
 
-# Step 56 - shift_targets_right_with_start_token (not yet solved)
-# TODO: implement
+# Step 56 - shift_targets_right_with_start_token
+import torch
+
+def shift_targets_right_with_start_token(target_ids, start_token_id):
+    """
+    Prepare teacher-forcing decoder input by shifting target ids right with start token.
+    
+    Args:
+        target_ids: Tensor of shape (batch, tgt_seq) with gold target token IDs
+        start_token_id: Integer ID of the start token
+    
+    Returns:
+        Tensor of same shape as target_ids with first column = start_token_id
+        and remaining columns = target_ids shifted right by one position.
+    """
+    batch_size, seq_len = target_ids.shape
+    
+    # Create tensor filled with start_token_id
+    shifted = torch.full_like(target_ids, start_token_id)
+    
+    # Copy target_ids[:, :-1] to shifted[:, 1:]
+    shifted[:, 1:] = target_ids[:, :-1]
+    
+    return shifted
 
 # Step 57 - compute_noam_learning_rate (not yet solved)
 # TODO: implement
